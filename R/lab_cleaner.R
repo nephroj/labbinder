@@ -1,6 +1,6 @@
 #' RUA_grade() Function
 #'
-#' Cleaning of data.
+#' Clean RUA results containing grade values such as 1+, 2+, 3+, and 4+.
 #' @param x Vector
 #' @keywords RUA_grade
 #' @export
@@ -35,7 +35,7 @@ RUA_grade = function(x) {
 
 #' RUA_micro() Function
 #'
-#' Cleaning of data.
+#' Clean RUA microscopic exam values.
 #' @param x Vector
 #' @keywords RUA_micro
 #' @export
@@ -46,8 +46,8 @@ RUA_micro = function(x) {
     is.na(x) ~ x,
     str_detect(str_to_lower(x), "many") ~ "many",
     str_detect(str_to_lower(x), "numer") ~ "numerous",
-    str_detect(x, "^\\d{5}") ~ paste0(as.character(month(as.Date(as.numeric(x), origin="1899-12-30"))),
-                                     "-", as.character(day(as.Date(as.numeric(x), origin="1899-12-30"))), "_"),
+    str_detect(x, "^\\d{5}") ~ paste0(as.character(month(as.Date(suppressWarnings(as.numeric(x)), origin="1899-12-30"))),
+                                     "-", as.character(day(as.Date(suppressWarnings(as.numeric(x)), origin="1899-12-30"))), "_"),
     TRUE ~ paste0(x, "_")
 
   )
@@ -57,7 +57,7 @@ RUA_micro = function(x) {
 
 #' A1c_cleaner() Function
 #'
-#' Cleaning of data.
+#' Clean HbA1c values.
 #' @param x Vector
 #' @keywords A1c_cleaner
 #' @export
@@ -76,7 +76,7 @@ A1c_cleaner = function(x){
 
 #' lab_cleaner() Function
 #'
-#' Cleaning of dataframe.
+#' Cleaning the dataframe.
 #' @param x Dataframe
 #' @keywords lab_cleaner
 #' @export
@@ -85,7 +85,6 @@ A1c_cleaner = function(x){
 lab_cleaner = function(data) {
   data_clean = data %>%
     mutate_at(vars(Uleuko, Uprot, Uglc, Uketone, UUB, Ubil, Uery, Unit), list(new = RUA_grade)) %>%
-    # mutate_at(vars(), list(Unit_new = RUA_grade_nit)) %>%
     mutate_at(vars(URBC, UWBC), list(new = RUA_micro)) %>%
     mutate_at(vars(HbA1c), list(HbA1c_new = A1c_cleaner))
   return(data_clean)

@@ -10,7 +10,7 @@ RUA_grade(x)
 \item{x}{Vector}
 }
 \description{
-Cleaning of data.
+Clean RUA results containing grade values such as 1+, 2+, 3+, and 4+.
 }
 \examples{
 RUA_grade(vector)

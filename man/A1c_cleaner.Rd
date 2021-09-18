@@ -10,7 +10,7 @@ A1c_cleaner(x)
 \item{x}{Vector}
 }
 \description{
-Cleaning of data.
+Clean HbA1c values.
 }
 \examples{
 A1c_cleaner(vector)

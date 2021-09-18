@@ -2,27 +2,28 @@
 #'
 #' This function tie multiple excel files containing laboratory data to one file.
 #' @param hospital Select the hospital: seoul, bucheon, or cheonan.
-#' @param ptlist_file_path Patient list file which included "id" and "orderdate" column.
+#' @param ptlist_path Patient list file which included "id" and "orderdate" column.
 #' @param lab_dir_path Directory path included excel files.
 #' @param savefile_name The name of output file name.
-#' @param info_file_path Path of information file.
+#' @param basic_info_path Path of information file.
 #' @param clean Make a cleaned data or not.
 #' @keywords lab_binder
 #' @export
 #' @examples
 #' lab_binder(
 #'   hospital = "seoul",
-#'   ptlist_file_path = "lab/seoul_remain.xlsx",
+#'   ptlist_path = "lab/seoul_remain.xlsx",
 #'   lab_dir_path = "lab/seoul_remain",
 #'   savefile_name = lab_dir_path,
 #' )
 lab_binder = function(
   hospital,
-  ptlist_file_path,
+  ptlist_path,
   lab_dir_path,
   savefile_name,
-  info_file_path = "basic_info_all.xlsx",
-  clean = T
+  basic_info_path = NULL,
+  clean = TRUE,
+  return = FALSE
 ) {
 
   # Load packages
@@ -32,21 +33,21 @@ lab_binder = function(
   library(lubridate)
   library(rstudioapi)
 
-  # Set working directory
-  # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-  # source("lab_cleaner.R")
-
   # Load data
-  basic_info = read_excel(info_file_path)
-  basic_info_hosp = basic_info %>%
+  if (is.null(basic_info_path)){
+    basic_info_dt = basic_info
+  } else{
+    basic_info_dt = read_excel(basic_info_path)
+  }
+  basic_info_hosp = basic_info_dt %>%
     select(!!as.name(hospital), sort1, vname)
 
-  ptlist = read_excel(ptlist_file_path)
+  ptlist = read_excel(ptlist_path)
   lab_files = list.files(lab_dir_path)
 
   # Print the status of data collection
-  cat("Number of patients in list file:", NROW(ptlist), "\n")
-  cat("Number of excel files collected:", length(lab_files), "\n")
+  cat("# Number of patients in list file:", NROW(ptlist), "\n")
+  cat("# Number of excel files collected:", length(lab_files), "\n")
 
 
   ## ALL DATA
@@ -108,7 +109,8 @@ lab_binder = function(
     save_file_name_all = paste0("output/", savefile_name, "_all_orig.csv")
     comdt_fin = comdt
   }
-  write.csv(comdt, save_file_name_all, na="", row.names=F, fileEncoding="CP949")
+  write.csv(comdt_fin, save_file_name_all, na="", row.names=F, fileEncoding="CP949")
+  cat("# All laboratory data are saved to", save_file_name_all, "\n")
 
   ## BASE DATA
   basedt = ptlist %>%
@@ -131,8 +133,11 @@ lab_binder = function(
     save_file_name_base = paste0("output/", savefile_name, "_base_orig.csv")
   }
   write.csv(basedt, save_file_name_base, na="", row.names=F, fileEncoding="CP949")
+  cat("# Baseline laboratory data are saved to", save_file_name_base, "\n")
 
-
+  if (return){
+    return(comdt_fin)
+  }
 }
 
 

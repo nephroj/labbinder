@@ -10,7 +10,7 @@ RUA_micro(x)
 \item{x}{Vector}
 }
 \description{
-Cleaning of data.
+Clean RUA microscopic exam values.
 }
 \examples{
 RUA_micro(vector)

@@ -6,23 +6,24 @@
 \usage{
 lab_binder(
   hospital,
-  ptlist_file_path,
+  ptlist_path,
   lab_dir_path,
   savefile_name,
-  info_file_path = "basic_info_all.xlsx",
-  clean = T
+  basic_info_path = NULL,
+  clean = TRUE,
+  return = FALSE
 )
 }
 \arguments{
 \item{hospital}{Select the hospital: seoul, bucheon, or cheonan.}
 
-\item{ptlist_file_path}{Patient list file which included "id" and "orderdate" column.}
+\item{ptlist_path}{Patient list file which included "id" and "orderdate" column.}
 
 \item{lab_dir_path}{Directory path included excel files.}
 
 \item{savefile_name}{The name of output file name.}
 
-\item{info_file_path}{Path of information file.}
+\item{basic_info_path}{Path of information file.}
 
 \item{clean}{Make a cleaned data or not.}
 }
@@ -32,7 +33,7 @@ This function tie multiple excel files containing laboratory data to one file.
 \examples{
 lab_binder(
   hospital = "seoul",
-  ptlist_file_path = "lab/seoul_remain.xlsx",
+  ptlist_path = "lab/seoul_remain.xlsx",
   lab_dir_path = "lab/seoul_remain",
   savefile_name = lab_dir_path,
 )

@@ -10,7 +10,7 @@ lab_cleaner(data)
 \item{x}{Dataframe}
 }
 \description{
-Cleaning of dataframe.
+Cleaning the dataframe.
 }
 \examples{
 lab_cleaner(data)
