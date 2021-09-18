@@ -1,0 +1,15 @@
+Package: labbinder
+Title: SCH Laboratory Data Binder
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "NJ",
+           family = "Cho",
+           role = c("aut", "cre"),
+           email = "coolnamz@naver.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Tie multiple excel files containing laboratory information into one file.
+License: friends
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
