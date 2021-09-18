@@ -26,13 +26,6 @@ lab_binder = function(
   return = FALSE
 ) {
 
-  # Load packages
-  library(tidyverse)
-  library(readxl)
-  library(writexl)
-  library(lubridate)
-  library(rstudioapi)
-
   # Load data
   if (is.null(basic_info_path)){
     basic_info_dt = basic_info
@@ -96,9 +89,12 @@ lab_binder = function(
     cat("[", n_of_file, "/", n_of_files, "]\n")
   }
 
-  ## data cleaning
+  ## Arrange variable order
+  comdt = comdt %>%
+    select(c("patientid", "labdate", basic_info_hosp$vname))
+
+  ## Clean data & Remove empty columns
   comdt_clean = comdt %>%
-    select(c("patientid", "labdate", basic_info_hosp$vname)) %>%
     lab_cleaner() %>%
     select_if(function(x){any(!is.na(x))})
 
@@ -109,8 +105,13 @@ lab_binder = function(
     save_file_name_all = paste0("output/", savefile_name, "_all_orig.csv")
     comdt_fin = comdt
   }
-  write.csv(comdt_fin, save_file_name_all, na="", row.names=F, fileEncoding="CP949")
-  cat("# All laboratory data are saved to", save_file_name_all, "\n")
+
+  if (!return){
+    write.csv(comdt_fin, save_file_name_all, na="", row.names=F, fileEncoding="CP949")
+    cat("# All laboratory data are saved to", save_file_name_all, "\n")
+  }
+
+
 
   ## BASE DATA
   basedt = ptlist %>%
@@ -132,12 +133,14 @@ lab_binder = function(
   } else{
     save_file_name_base = paste0("output/", savefile_name, "_base_orig.csv")
   }
-  write.csv(basedt, save_file_name_base, na="", row.names=F, fileEncoding="CP949")
-  cat("# Baseline laboratory data are saved to", save_file_name_base, "\n")
 
-  if (return){
-    return(comdt_fin)
+  if (!return){
+    write.csv(basedt, save_file_name_base, na="", row.names=F, fileEncoding="CP949")
+    cat("# Baseline laboratory data are saved to", save_file_name_base, "\n")
+  } else{
+    return(list(comdt_fin, basedt))
   }
+
 }
 
 
