@@ -41,8 +41,8 @@ extract_fu = function(
     ) %>%
     filter(!is.na(labmonth_cat)) %>%
     mutate(lab_month = paste0(fu_lab_name, "_", sprintf("%03d", labmonth_cat), "m")) %>%
-    arrange(id, lab_month, labmonth_error) %>%
-    group_by(id, lab_month) %>%
+    arrange(id, orderdate, lab_month, labmonth_error) %>%
+    group_by(id, orderdate, lab_month) %>%
     summarise_at(c(fu_lab_name), select_first_lab)
 
   if (fu_wide) {

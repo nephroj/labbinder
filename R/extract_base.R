@@ -16,11 +16,11 @@ extract_base = function(
 ){
   ## BASE DATA
   basedt = data %>%
-    filter(labdate >= orderdate - months(base_window_period) & labdate <= orderdate + months(base_window_period)) %>%
     mutate(
       lab_diff = difftime(labdate, orderdate, units="days"),
       abs_lab_diff = abs(lab_diff)
     ) %>%
+    filter(abs_lab_diff <= 30.4375 * base_window_period) %>%
     arrange(id, orderdate, abs_lab_diff) %>%
     group_by(id, orderdate) %>%
     summarise_all(select_first_lab) %>%
