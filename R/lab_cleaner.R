@@ -31,6 +31,7 @@ RUA_grade = function(x) {
       TRUE ~ "error"
     )
   }
+  return(grade)
 }
 
 #' RUA_micro() Function
@@ -42,14 +43,22 @@ RUA_grade = function(x) {
 #' @examples
 #' RUA_micro(vector)
 RUA_micro = function(x) {
+  x = str_replace_all(x, "\\s+", "")
   result = case_when(
     is.na(x) ~ x,
     str_detect(str_to_lower(x), "many") ~ "many",
     str_detect(str_to_lower(x), "numer") ~ "numerous",
-    str_detect(x, "^\\d{5}") ~ paste0(as.character(month(as.Date(suppressWarnings(as.numeric(x)), origin="1899-12-30"))),
-                                     "-", as.character(day(as.Date(suppressWarnings(as.numeric(x)), origin="1899-12-30"))), "_"),
-    TRUE ~ paste0(x, "_")
+    str_detect(x, "^\\d{5}") ~
+      paste0(as.character(month(as.Date(suppressWarnings(as.numeric(x)), origin="1899-12-30"))),
+             "-", as.character(day(as.Date(suppressWarnings(as.numeric(x)), origin="1899-12-30"))), "_"),
+    # str_detect(x, "1Grade") ~ "<1_",
+    # str_detect(x, "2Grade") ~ "1-4_",
+    # str_detect(x, "3Grade") ~ "5-9_",
+    # str_detect(x, "4Grade") ~ "10-29_",
+    # str_detect(x, "5Grade") ~ "30-100_",
+    # str_detect(x, "6Grade") ~ ">100_",
 
+    TRUE ~ paste0(x, "_")
   )
   return(result)
 }
@@ -84,9 +93,9 @@ A1c_cleaner = function(x){
 #' lab_cleaner(data)
 lab_cleaner = function(data) {
   data_clean = data %>%
-    mutate_at(vars(Uleuko, Uprot, Uglc, Uketone, UUB, Ubil, Uery, Unit), list(new = RUA_grade)) %>%
-    mutate_at(vars(URBC, UWBC), list(new = RUA_micro)) %>%
-    mutate_at(vars(HbA1c), list(HbA1c_new = A1c_cleaner))
+    mutate_at(vars(Uleuko, Uprot, Uglc, Uketone, UUB, Ubil, Uery, Unit), RUA_grade) %>%
+    mutate_at(vars(URBC, UWBC), RUA_micro) %>%
+    mutate_at(vars(HbA1c), A1c_cleaner)
   return(data_clean)
 }
 
