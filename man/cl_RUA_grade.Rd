@@ -12,7 +12,4 @@ cl_RUA_grade(x)
 \description{
 Clean RUA results containing grade values such as 1+, 2+, 3+, and 4+.
 }
-\examples{
-cl_RUA_grade(vector)
-}
 \keyword{cl_RUA_grade}

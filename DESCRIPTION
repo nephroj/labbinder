@@ -1,23 +1,24 @@
 Package: labbinder
 Title: SCH Laboratory Data Binder
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     person(given = "NJ",
            family = "Cho",
            role = c("aut", "cre"),
-           email = "coolnamz@naver.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+           email = "coolnamz@naver.com")
 Description: Tie multiple excel files containing laboratory information into one file.
-License: friends
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Depends: 
     R (>= 2.10),
+Imports:
     dplyr (>= 1.0.5),
     tidyr (>= 1.1.2),
     stringr (>= 1.4.0),
     readxl (>= 1.3.0),
     tibble (>= 3.1.0),
-    lubridate (>= 1.7.0)
+    lubridate (>= 1.7.0),
+    rlang (>= 0.4.0)

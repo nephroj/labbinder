@@ -12,7 +12,4 @@ cl_A1c(x)
 \description{
 Clean HbA1c values.
 }
-\examples{
-cl_A1c(vector)
-}
 \keyword{cl_A1c}

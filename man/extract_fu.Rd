@@ -26,13 +26,4 @@ extract_fu(
 \description{
 Extracting lab data at specific intervals.
 }
-\examples{
-extract_fu(
-  data = bx_cheonan_all
-  fu_lab_name = "Cr"
-  fu_intv_month = 3
-  fu_max_month = 192
-  fu_wide = T
-)
-}
 \keyword{extract_fu}

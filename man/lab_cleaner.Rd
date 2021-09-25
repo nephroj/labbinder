@@ -7,12 +7,9 @@
 lab_cleaner(data)
 }
 \arguments{
-\item{x}{Dataframe}
+\item{data}{Dataframe to be cleaned}
 }
 \description{
 Cleaning the dataframe.
-}
-\examples{
-lab_cleaner(data)
 }
 \keyword{lab_cleaner}

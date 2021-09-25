@@ -8,14 +8,6 @@
 #' @param fu_wide Wide format or long format.
 #' @keywords extract_fu
 #' @export
-#' @examples
-#' extract_fu(
-#'   data = bx_cheonan_all
-#'   fu_lab_name = "Cr"
-#'   fu_intv_month = 3
-#'   fu_max_month = 192
-#'   fu_wide = T
-#' )
 extract_fu = function(
   data,
   fu_lab_name,
@@ -30,8 +22,8 @@ extract_fu = function(
   data_cut = data %>%
     select(id, orderdate, labdate, !!as.name(fu_lab_name)) %>%
     mutate(
-      labdiff = difftime(labdate, orderdate, units="days"),
-      labyear = as.numeric(labdiff / 365.25),
+      lab_diff = difftime(labdate, orderdate, units="days"),
+      labyear = as.numeric(lab_diff / 365.25),
       labmonth = labyear * 12,
       labmonth_cat = cut(labmonth,
                          breaks=seq(-half_intv, max_month_plus_half_intv, by=fu_intv_month),
@@ -40,14 +32,14 @@ extract_fu = function(
       labmonth_error = abs(labmonth_cat - labmonth)
     ) %>%
     filter(!is.na(labmonth_cat)) %>%
-    mutate(lab_month = paste0(fu_lab_name, "_", sprintf("%03d", labmonth_cat), "m")) %>%
-    arrange(id, orderdate, lab_month, labmonth_error) %>%
-    group_by(id, orderdate, lab_month) %>%
+    mutate(labmonth_str = paste0(fu_lab_name, "_", sprintf("%03d", labmonth_cat), "m")) %>%
+    arrange(id, orderdate, labmonth_str, labmonth_error) %>%
+    group_by(id, orderdate, labmonth_str) %>%
     summarise_at(c(fu_lab_name), select_first_lab)
 
   if (fu_wide) {
     data_cut = data_cut %>%
-      spread(lab_month, !!as.name(fu_lab_name))
+      spread(labmonth_str, !!as.name(fu_lab_name))
   }
   return(data_cut)
 

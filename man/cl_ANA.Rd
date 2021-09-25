@@ -12,7 +12,4 @@ cl_ANA(x)
 \description{
 Clean ANA values.
 }
-\examples{
-cl_ANA(vector)
-}
 \keyword{cl_ANA}

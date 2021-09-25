@@ -12,7 +12,4 @@ cl_RUA_micro(x)
 \description{
 Clean RUA microscopic exam values.
 }
-\examples{
-cl_RUA_micro(vector)
-}
 \keyword{cl_RUA_micro}

@@ -8,7 +8,7 @@ bind_base_save(
   hospital,
   ptlist_file,
   lab_dir_path,
-  basic_info_file = NULL,
+  lab_info_file = NULL,
   clean = TRUE,
   base_window_period = 4,
   savefile_name
@@ -21,7 +21,7 @@ bind_base_save(
 
 \item{lab_dir_path}{Directory path included excel files.}
 
-\item{basic_info_file}{Path of information file.}
+\item{lab_info_file}{Path of information file.}
 
 \item{clean}{Make a cleaned data or not.}
 
@@ -31,16 +31,5 @@ bind_base_save(
 }
 \description{
 Bind all labs, extract baseline data, and save to CSV files.
-}
-\examples{
-bind_base_save(
-  hospital = "seoul",
-  ptlist_file = "lab/seoul_remain.xlsx",
-  lab_dir_path = "lab/seoul_remain",
-  savefile_name = lab_dir_path,
-  basic_info_file = NULL,
-  clean = TRUE,
-  base_window_period = 4
-)
 }
 \keyword{bind_base_save}

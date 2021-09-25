@@ -5,11 +5,6 @@
 #' @param base_window_period Window period (months).
 #' @keywords extract_base
 #' @export
-#' @examples
-#' extract_base(
-#'   data = seoul_remain_all,
-#'   base_window_period = 4
-#' )
 extract_base = function(
   data,
   base_window_period = 4

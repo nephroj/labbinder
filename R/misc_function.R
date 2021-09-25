@@ -1,11 +1,9 @@
 #' select_first_lab() Function
 #'
 #' Select first lab value except NA.
-#' @param x Vector
+#' @param vector Vector
 #' @keywords select_first_lab
 #' @export
-#' @examples
-#' select_first_lab(vector)
 select_first_lab = function(vector) {
   vec_filter_NA = vector[!is.na(vector)]
   return(vec_filter_NA[1])
@@ -18,10 +16,9 @@ select_first_lab = function(vector) {
 #' @param data data.frame object
 #' @param lab variable to examine
 #' @param clean_fun specific function cleaning a variable
+#' @param ... parameters for cleaining function (clean_fun)
 #' @keywords compare_clean
 #' @export
-#' @examples
-#' compare_clean(data, "HbA1c", cl_A1c)
 compare_clean = function(data, lab, clean_fun, ...){
   vec = data[[lab]]
   tab = as.data.frame(table(vec)) %>%
@@ -39,8 +36,6 @@ compare_clean = function(data, lab, clean_fun, ...){
 #' @param data data.frame object
 #' @keywords select_non_num
 #' @export
-#' @examples
-#' select_non_num(data)
 select_non_num = function(data){
   not_numeric_dt = data.frame()
   numeric_var = c()

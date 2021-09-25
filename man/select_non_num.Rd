@@ -12,7 +12,4 @@ select_non_num(data)
 \description{
 Show non numeric variables and their values.
 }
-\examples{
-select_non_num(data)
-}
 \keyword{select_non_num}

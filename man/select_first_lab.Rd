@@ -7,12 +7,9 @@
 select_first_lab(vector)
 }
 \arguments{
-\item{x}{Vector}
+\item{vector}{Vector}
 }
 \description{
 Select first lab value except NA.
-}
-\examples{
-select_first_lab(vector)
 }
 \keyword{select_first_lab}

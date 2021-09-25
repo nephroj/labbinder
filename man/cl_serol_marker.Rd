@@ -14,7 +14,4 @@ cl_serol_marker(x, cutoff = 0)
 \description{
 Clean serologic markers values.
 }
-\examples{
-cl_serol_marker(vector)
-}
 \keyword{cl_serol_marker}

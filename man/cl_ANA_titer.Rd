@@ -12,7 +12,4 @@ cl_ANA_titer(x)
 \description{
 Clean ANA titer values.
 }
-\examples{
-cl_ANA_titer(vector)
-}
 \keyword{cl_ANA_titer}

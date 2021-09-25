@@ -12,7 +12,4 @@ cl_extract_titer(x)
 \description{
 Extract titer values.
 }
-\examples{
-cl_extract_titer(vector)
-}
 \keyword{cl_extract_titer}

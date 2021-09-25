@@ -5,26 +5,17 @@
 #' @param ptlist_file Patient list file which included "id" and "orderdate" column.
 #' @param lab_dir_path Directory path included excel files.
 #' @param savefile_name The name of output file name.
-#' @param basic_info_file Path of information file.
+#' @param lab_info_file Path of information file.
 #' @param clean Make a cleaned data or not.
 #' @param base_window_period Window period for baseline laboratory data (months).
 #' @keywords bind_base_save
+#' @importFrom utils write.csv
 #' @export
-#' @examples
-#' bind_base_save(
-#'   hospital = "seoul",
-#'   ptlist_file = "lab/seoul_remain.xlsx",
-#'   lab_dir_path = "lab/seoul_remain",
-#'   savefile_name = lab_dir_path,
-#'   basic_info_file = NULL,
-#'   clean = TRUE,
-#'   base_window_period = 4
-#' )
 bind_base_save = function(
   hospital,
   ptlist_file,
   lab_dir_path,
-  basic_info_file = NULL,
+  lab_info_file = NULL,
   clean = TRUE,
   base_window_period = 4,
   savefile_name
@@ -34,7 +25,7 @@ bind_base_save = function(
     hospital = hospital,
     ptlist_file = ptlist_file,
     lab_dir_path = lab_dir_path,
-    basic_info_file = basic_info_file,
+    lab_info_file = lab_info_file,
     clean = clean
   )
 

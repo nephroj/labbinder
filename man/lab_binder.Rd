@@ -8,7 +8,7 @@ lab_binder(
   hospital,
   ptlist_file,
   lab_dir_path,
-  basic_info_file = NULL,
+  lab_info_file = NULL,
   clean = TRUE
 )
 }
@@ -19,20 +19,11 @@ lab_binder(
 
 \item{lab_dir_path}{Directory path included excel files.}
 
-\item{basic_info_file}{Path of information file.}
+\item{lab_info_file}{Path of information file.}
 
 \item{clean}{Make a cleaned data or not.}
 }
 \description{
 This function tie multiple excel files containing laboratory data to one file.
-}
-\examples{
-lab_binder(
-  hospital = "seoul",
-  ptlist_file = "lab/seoul_remain.xlsx",
-  lab_dir_path = "lab/seoul_remain",
-  basic_info_file = NULL,
-  clean = TRUE
-)
 }
 \keyword{lab_binder}

@@ -12,11 +12,10 @@ compare_clean(data, lab, clean_fun, ...)
 \item{lab}{variable to examine}
 
 \item{clean_fun}{specific function cleaning a variable}
+
+\item{...}{parameters for cleaining function (clean_fun)}
 }
 \description{
 Compare previous values and cleaned values after applying a specific function.
-}
-\examples{
-compare_clean(data, "HbA1c", cl_A1c)
 }
 \keyword{compare_clean}

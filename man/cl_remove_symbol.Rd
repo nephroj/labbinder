@@ -12,7 +12,4 @@ cl_remove_symbol(x)
 \description{
 Remove the symbols unnecessary
 }
-\examples{
-cl_remove_symbol(vector)
-}
 \keyword{cl_remove_symbol}

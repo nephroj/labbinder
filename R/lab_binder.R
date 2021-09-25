@@ -4,33 +4,54 @@
 #' @param hospital Select the hospital: seoul, bucheon, or cheonan.
 #' @param ptlist_file Patient list file which included "id" and "orderdate" column.
 #' @param lab_dir_path Directory path included excel files.
-#' @param basic_info_file Path of information file.
+#' @param lab_info_file Path of information file.
 #' @param clean Make a cleaned data or not.
 #' @keywords lab_binder
+#' @importFrom readxl read_excel
+#' @importFrom dplyr %>%
+#' @importFrom rlang :=
+#' @importFrom dplyr select
+#' @importFrom dplyr mutate
+#' @importFrom dplyr mutate_at
+#' @importFrom dplyr mutate_all
+#' @importFrom dplyr rename
+#' @importFrom dplyr filter
+#' @importFrom dplyr summarise_all
+#' @importFrom dplyr summarise_at
+#' @importFrom dplyr arrange
+#' @importFrom dplyr starts_with
+#' @importFrom dplyr group_by
+#' @importFrom dplyr left_join
+#' @importFrom dplyr bind_rows
+#' @importFrom dplyr case_when
+#' @importFrom tidyr spread
+#' @importFrom tibble column_to_rownames
+#' @importFrom tibble rownames_to_column
+#' @importFrom stringr str_detect
+#' @importFrom stringr str_extract
+#' @importFrom stringr str_replace
+#' @importFrom stringr str_replace_all
+#' @importFrom stringr str_c
+#' @importFrom stringr str_squish
+#' @importFrom stringr str_to_lower
+#' @importFrom lubridate month
+#' @importFrom lubridate day
 #' @export
-#' @examples
-#' lab_binder(
-#'   hospital = "seoul",
-#'   ptlist_file = "lab/seoul_remain.xlsx",
-#'   lab_dir_path = "lab/seoul_remain",
-#'   basic_info_file = NULL,
-#'   clean = TRUE
-#' )
 lab_binder = function(
   hospital,
   ptlist_file,
   lab_dir_path,
-  basic_info_file = NULL,
+  lab_info_file = NULL,
   clean = TRUE
 ) {
 
   # Load data
-  if (is.null(basic_info_file)){
-    basic_info_dt = basic_info
+  if (is.null(lab_info_file)){
+    lab_info_dt = lab_info
   } else{
-    basic_info_dt = suppressMessages(suppressWarnings(read_excel(basic_info_file)))
+    lab_info_dt = suppressMessages(suppressWarnings(read_excel(lab_info_file)))
   }
-  basic_info_hosp = basic_info_dt %>%
+  lab_info_hosp = lab_info_dt %>%
     select(!!as.name(hospital), sort1, vname)
 
   # Load ptlist file
@@ -80,8 +101,8 @@ lab_binder = function(
     }
 
     dt1 = suppressMessages(suppressWarnings(read_excel(file)))
-    # Specific column must included in excel file
-    if (!"참고치" %in% colnames(dt1) & !"검사항목" %in% colnames(dt1)) {
+    # Specific column must included in excel file (cham-go-chi, kum-sa-hang-mok)
+    if (!"\ucc38\uace0\uce58" %in% colnames(dt1) & !"\uac80\uc0ac\ud56d\ubaa9" %in% colnames(dt1)) {
       cat(file_name, "is not a EMR excel file.\n")
       next
     }
@@ -89,17 +110,17 @@ lab_binder = function(
     id = str_extract(file_name, "\\d+")
     dt1 = dt1 %>%
       select(!starts_with("..")) %>%
-      select(-"참고치") %>%
+      select(-"\ucc38\uace0\uce58") %>%                      # cham-go-chi
       rename(
-        !!as.name(hospital) := "검사항목",
-        sort1 = "검체명"
+        !!as.name(hospital) := "\uac80\uc0ac\ud56d\ubaa9",   # kum-sa-hang-mok
+        sort1 = "\uac80\uccb4\uba85"                         # kum-che-myeong
       ) %>%
       filter(!str_detect(sort1, "(Body)|(Pleural)|(Peritoneal)|(CSF)|(Joint)")) %>%
-      mutate(
-        sort1 = ifelse(str_detect(sort1, "(Urine)|(낮소변)|(밤소변)"), "urine", "blood")
+      mutate(                                                # not-so-byeon, bam-so-byeon
+        sort1 = ifelse(str_detect(sort1, "(Urine)|(\ub0ae\uc18c\ubcc0)|(\ubc24\uc18c\ubcc0)"), "urine", "blood")
       )
 
-    dt1_final = basic_info_hosp %>%
+    dt1_final = lab_info_hosp %>%
       left_join(dt1, by=c(hospital, "sort1")) %>%
       select(-!!as.name(hospital), -sort1) %>%   # remain vname only
       filter(!is.na(vname)) %>%                  # remove the vname not included in info-file
@@ -120,14 +141,14 @@ lab_binder = function(
 
   ## Check if comdt_pre doesn't have any data.
   if (sum(dim(comdt_pre) == 0) > 0) {
-    stop("There is no available data. Check the data files included.")
+    stop("There is no available data. Check the EMR data files.")
   }
 
   ## Combine ptlist with labdata / Arrange variable order
   comdt = ptlist %>%
     left_join(comdt_pre, by="id") %>%
     mutate(hospital = hospital) %>%
-    select(c("hospital", "id", "orderdate", "labdate", basic_info_hosp$vname))
+    select(c("hospital", "id", "orderdate", "labdate", lab_info_hosp$vname))
   cat("Data combination is done.\n")
 
   ## Clean data & Remove empty columns
@@ -138,4 +159,5 @@ lab_binder = function(
 
   return(comdt)
 }
+
 

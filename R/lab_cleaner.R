@@ -4,11 +4,9 @@
 #' @param x Vector
 #' @keywords cl_RUA_grade
 #' @export
-#' @examples
-#' cl_RUA_grade(vector)
 cl_RUA_grade = function(x) {
   if(length(intersect(unique(x), c("2+", "+2", "++", "3+", "+3", "+++"))) > 0){
-    # Uprot과 같이 1+, 2+, 3+ 단계로 이루어진 경우
+    # variables with 1+, 2+, 3+, or 4+ grade (like Uprot)
     grade = case_when(
       is.na(x) ~ x,
       str_detect(str_to_lower(x), "([+][+][+][+])|(4[+])|([+]4)") ~ "4+",
@@ -21,7 +19,7 @@ cl_RUA_grade = function(x) {
       TRUE ~ paste0(x, "_error")
     )
   } else{
-    # Unit와 같이 negative or positive로 이루어진 경우
+    # variables with positive or negative values (like Unit)
     grade = case_when(
       is.na(x) ~ x,
       str_detect(str_to_lower(x), "n") ~ "Negative",
@@ -40,8 +38,6 @@ cl_RUA_grade = function(x) {
 #' @param x Vector
 #' @keywords cl_RUA_micro
 #' @export
-#' @examples
-#' cl_RUA_micro(vector)
 cl_RUA_micro = function(x) {
   x = str_replace(x, "[(][?][)]", "")
   x = str_replace(x, "[-]{2}", "-")
@@ -77,8 +73,6 @@ cl_RUA_micro = function(x) {
 #' @param x Vector
 #' @keywords cl_A1c
 #' @export
-#' @examples
-#' cl_A1c(vector)
 cl_A1c = function(x){
   result = ifelse(
     str_detect(x, "\\d{1,2}[.]\\d+\\s*\\D"),
@@ -93,8 +87,6 @@ cl_A1c = function(x){
 #' @param cutoff cutoff value for positive
 #' @keywords cl_serol_marker
 #' @export
-#' @examples
-#' cl_serol_marker(vector)
 cl_serol_marker = function(x, cutoff=0){
   if (cutoff == 0){
     x2 = str_replace_all(x, "\\s*", "")
@@ -120,8 +112,6 @@ cl_serol_marker = function(x, cutoff=0){
 #' @param x Vector
 #' @keywords cl_extract_titer
 #' @export
-#' @examples
-#' cl_extract_titer(vector)
 cl_extract_titer = function(x){
   x2 = str_replace_all(x, "\\s*", "")
   result = str_extract(x2, "\\d+[.]{0,1}\\d*e{0,1}[-|+]{0,1}\\d*")
@@ -134,8 +124,6 @@ cl_extract_titer = function(x){
 #' @param x Vector
 #' @keywords cl_ANA
 #' @export
-#' @examples
-#' cl_ANA(vector)
 cl_ANA = function(x){
   x2 = str_to_lower(x)
   result = case_when(
@@ -159,8 +147,6 @@ cl_ANA = function(x){
 #' @param x Vector
 #' @keywords cl_ANA_titer
 #' @export
-#' @examples
-#' cl_ANA_titer(vector)
 cl_ANA_titer = function(x){
   num_to_titer = function(ana){
     result = case_when(
@@ -192,8 +178,6 @@ cl_ANA_titer = function(x){
 #' @param x Vector
 #' @keywords cl_remove_symbol
 #' @export
-#' @examples
-#' cl_remove_symbol(vector)
 cl_remove_symbol = function(x){
   if (length(x[!is.na(x)]) == 0){
     return(x)
@@ -202,8 +186,8 @@ cl_remove_symbol = function(x){
   result = case_when(
     str_detect(x2, "(?<=[<|>])\\d+[.]{0,1}\\d*") ~ str_extract(x2, "(?<=[<|>])\\d+[.]{0,1}\\d*"),
     str_detect(x2, "^[.]|[-]{1,4}$") ~ NA_character_,
-    str_detect(x2, "\\d+[.]{0,1}\\d*(?=(sec){0,1}((이상)|(이하)))") ~
-      str_extract(x2, "\\d+[.]{0,1}\\d*(?=(sec){0,1}((이상)|(이하)))")  ,
+    str_detect(x2, "\\d+[.]{0,1}\\d*(?=(sec){0,1}((\uc774\uc0c1)|(\uc774\ud558)))") ~     # e-sang, e-ha
+      str_extract(x2, "\\d+[.]{0,1}\\d*(?=(sec){0,1}((\uc774\uc0c1)|(\uc774\ud558)))"),   # e-sang, e-ha
     TRUE ~ x2
   )
   result = str_squish(result)
@@ -222,11 +206,9 @@ cl_remove_symbol = function(x){
 #' lab_cleaner() Function
 #'
 #' Cleaning the dataframe.
-#' @param x Dataframe
+#' @param data Dataframe to be cleaned
 #' @keywords lab_cleaner
 #' @export
-#' @examples
-#' lab_cleaner(data)
 lab_cleaner = function(data) {
   cat("Data cleaning started.\n")
   data_clean = data %>%

@@ -14,10 +14,4 @@ extract_base(data, base_window_period = 4)
 \description{
 Extracting baseline laboratory data.
 }
-\examples{
-extract_base(
-  data = seoul_remain_all,
-  base_window_period = 4
-)
-}
 \keyword{extract_base}
