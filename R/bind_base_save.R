@@ -39,6 +39,5 @@ bind_base_save = function(
   save_file_base = paste0(savefile_name, "_base.csv")
   write.csv(comdt, save_file_all, na="", row.names=F, fileEncoding="CP949")
   write.csv(basedt, save_file_base, na="", row.names=F, fileEncoding="CP949")
-  cat('# All laboratory data are saved to "', save_file_all,'"\n', sep="")
-  cat('# Baseline laboratory data are saved to "', save_file_base,'"\n', sep="")
+  cat('Data saving is done. ->', dirname(save_file_all), '\n')
 }
