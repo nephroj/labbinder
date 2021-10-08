@@ -71,6 +71,7 @@ lab_binder = function(
   }
 
   lab_files = list.files(lab_dir_path)
+  lab_files = lab_files[str_detect(lab_files, "[.]xlsx")]
   n_of_files = length(lab_files)
 
   # Print the status of data collection
@@ -91,11 +92,8 @@ lab_binder = function(
     }
     file = file.path(lab_dir_path, file_name)
 
-    # skip if file_name did not contain ".xlsx" or id number
-    if (!str_detect(file_name, "[.]xlsx")) {
-      cat(file_name, "is not a xlsx file.\n")
-      next
-    } else if(!str_detect(file_name, "\\d+")){
+    # skip if file_name did not contain id number
+    if (!str_detect(file_name, "\\d+")){
       cat(file_name, "does not have a id number.\n")
       next
     }

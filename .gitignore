@@ -1,6 +1,7 @@
 .Rproj.user
 .Rhistory
 .Rbuildignore
+.RData
 
 temp
 output
