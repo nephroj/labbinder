@@ -210,7 +210,6 @@ cl_remove_symbol = function(x){
 #' @keywords lab_cleaner
 #' @export
 lab_cleaner = function(data) {
-  cat("Data cleaning started.\n")
   data_clean = data %>%
     mutate_at(c("Uleuko", "Uprot", "Uglc", "Uketone", "UUB", "Ubil", "Uery", "Unit"), cl_RUA_grade) %>%
     mutate_at(c("URBC", "UWBC"), cl_RUA_micro) %>%
