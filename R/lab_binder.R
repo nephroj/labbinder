@@ -65,7 +65,10 @@ lab_binder = function(
   if ("id" %in% colnames(ptlist) & "orderdate" %in% colnames(ptlist)){
     ptlist = ptlist %>%
       select(id, orderdate) %>%
-      mutate(id = as.integer(id))
+      mutate(
+        id = as.integer(id),
+        orderdate = as.Date(as.integer(orderdate), origin="1899-12-30")
+      )
   } else{
     stop('ptlist must have "id" and "orderdate" column.')
   }
