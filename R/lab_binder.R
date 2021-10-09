@@ -49,14 +49,14 @@ lab_binder = function(
   if (is.null(lab_info_file)){
     lab_info_dt = lab_info
   } else{
-    lab_info_dt = suppressMessages(suppressWarnings(read_excel(lab_info_file)))
+    lab_info_dt = suppressMessages(suppressWarnings(read_excel(lab_info_file, col_types="text")))
   }
   lab_info_hosp = lab_info_dt %>%
     select(!!as.name(hospital), sort1, vname)
 
   # Load ptlist file
   if (str_detect(ptlist_file, "[.]xlsx")) {
-    ptlist = suppressMessages(suppressWarnings(read_excel(ptlist_file)))
+    ptlist = suppressMessages(suppressWarnings(read_excel(ptlist_file, col_types="text")))
   } else{
     stop("ptlist file should be a xlsx file.")
   }
@@ -98,7 +98,7 @@ lab_binder = function(
       next
     }
 
-    dt1 = suppressMessages(suppressWarnings(read_excel(file)))
+    dt1 = suppressMessages(suppressWarnings(read_excel(file, col_types="text")))
     # Specific column must included in excel file (cham-go-chi, kum-sa-hang-mok)
     if (!"\ucc38\uace0\uce58" %in% colnames(dt1) & !"\uac80\uc0ac\ud56d\ubaa9" %in% colnames(dt1)) {
       cat(file_name, "is not a EMR excel file.\n")
