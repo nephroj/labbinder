@@ -63,3 +63,14 @@ select_non_num = function(data){
     }
   }
 }
+
+#' remove_empty_cols() Function
+#'
+#' Show non numeric variables and their values.
+#' @param data data.frame object
+#' @keywords remove_empty_cols
+#' @export
+remove_empty_cols = function(data){
+  clean_data = data[!sapply(data, function(x) all(is.na(x)))]
+  return(clean_data)
+}
