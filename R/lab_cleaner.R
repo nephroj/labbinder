@@ -194,7 +194,10 @@ cl_remove_symbol = function(x){
   result_non_num = result[!is.na(result) & !str_detect(result, "^\\d+[.]{0,1}\\d*(e|E){0,1}[-|+]{0,1}\\d*$")]
   result_total_len = length(result[!is.na(result)])
   result_non_num_len = length(result_non_num)
-  if (result_non_num_len / result_total_len < 0.02) {
+  if (result_total_len == 0){
+    return(x)
+  }
+  else if (result_non_num_len / result_total_len < 0.02) {
     if(result_non_num_len != 0) cat(unique(result_non_num), "will be replaced by NA.\n")
     result[!is.na(result) & !str_detect(result, "^\\d+[.]{0,1}\\d*(e|E){0,1}[-|+]{0,1}\\d*$")] = NA
     return(as.numeric(result))
