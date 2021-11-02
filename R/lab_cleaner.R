@@ -213,32 +213,101 @@ cl_remove_symbol = function(x){
 #' @keywords lab_cleaner
 #' @export
 lab_cleaner = function(data) {
+  column_name = colnames(data)
+
+  clean_apply = function(data, var, func, ..., varname=var){
+    if (var %in% column_name){
+      data_clean = data %>%
+        mutate(!!as.name(varname) := func(data[[var]], ...))
+    }
+  }
+
   data_clean = data %>%
-    mutate_at(c("Uleuko", "Uprot", "Uglc", "Uketone", "UUB", "Ubil", "Uery", "Unit"), cl_RUA_grade) %>%
-    mutate_at(c("URBC", "UWBC"), cl_RUA_micro) %>%
-    mutate_at(c("HbA1c"), cl_A1c) %>%
+    clean_apply("Uleuko", cl_RUA_grade) %>%
+    clean_apply("Uprot", cl_RUA_grade) %>%
+    clean_apply("Uketone", cl_RUA_grade) %>%
+    clean_apply("UUB", cl_RUA_grade) %>%
+    clean_apply("Ubil", cl_RUA_grade) %>%
+    clean_apply("Uery", cl_RUA_grade) %>%
+    clean_apply("Unit", cl_RUA_grade) %>%
 
-    mutate_at(c("anti_GBM", "anti_dsDNA", "ANCA_PR3", "ANCA_MPO"),
-              .funs=list(titer=cl_extract_titer)) %>%
-    mutate_at(c("anti_HIV", "anti_HCV", "HBsAg", "RPR", "anti_HAV"),
-              cl_serol_marker, cutoff=1) %>%
-    mutate_at(c("anti_HBs"), cl_serol_marker, cutoff=10) %>%
-    mutate_at(c("anti_GBM"), cl_serol_marker, cutoff=15) %>%
-    mutate_at(c("anti_dsDNA", "ANCA", "ANCA_PR3", "ANCA_MPO", "cryoglobulin"),
-              cl_serol_marker, cutoff=0) %>%
-    mutate(
-      RPR = ifelse(
-        RPR2 == "Non Reactive", "Negative",
-        ifelse(RPR2 == "Reactive", "Positive", RPR)),
-      dysRBC = ifelse(str_detect(dysRBC, "(unable)|(countable)"), "0", str_squish(dysRBC))
-    ) %>%
+    clean_apply("URBC", cl_RUA_micro) %>%
+    clean_apply("UWBC", cl_RUA_micro) %>%
 
-    mutate_at(c("ANA"), cl_ANA) %>%
-    mutate_at(c("ANAtiter"), cl_ANA_titer) %>%
+    clean_apply("HbA1c", cl_A1c) %>%
 
+    clean_apply("anti_GBM", cl_extract_titer, varname="anti_GBM_titer") %>%
+    clean_apply("anti_dsDNA", cl_extract_titer, varname="anti_dsDNA_titer") %>%
+    clean_apply("ANCA_PR3", cl_extract_titer, varname="ANCA_PR3_titer") %>%
+    clean_apply("ANCA_MPO", cl_extract_titer , varname="ANCA_MPO_titer") %>%
+
+    clean_apply("anti_HIV", cl_serol_marker, cutoff=1) %>%
+    clean_apply("anti_HCV", cl_serol_marker, cutoff=1) %>%
+    clean_apply("HBsAg", cl_serol_marker, cutoff=1) %>%
+    clean_apply("anti_HAV", cl_serol_marker, cutoff=1) %>%
+    clean_apply("RPR", cl_serol_marker, cutoff=1) %>%
+
+    clean_apply("anti_HBs", cl_serol_marker, cutoff=10) %>%
+    clean_apply("anti_GBM", cl_serol_marker, cutoff=15) %>%
+
+    clean_apply("anti_dsDNA", cl_serol_marker, cutoff=0) %>%
+    clean_apply("ANCA", cl_serol_marker, cutoff=0) %>%
+    clean_apply("ANCA_PR3", cl_serol_marker, cutoff=0) %>%
+    clean_apply("ANCA_MPO", cl_serol_marker, cutoff=0) %>%
+    clean_apply("cryoglobulin", cl_serol_marker, cutoff=0) %>%
+
+    clean_apply("ANA", cl_ANA) %>%
+    clean_apply("ANAtiter", cl_ANA_titer)
+
+  if ("RPR" %in% column_name & "RPR2" %in% column_name){
+    data_clean = data_clean %>%
+      mutate(
+        RPR = case_when(
+          RPR2 == "Non Reactive" ~ "Negative",
+          RPR2 == "Reactive" ~ "Positive",
+          TRUE ~ RPR)
+      )
+  }
+  if ("dysRBC" %in% column_name){
+    data_clean = data_clean %>%
+      mutate(
+        dysRBC = ifelse(str_detect(dysRBC, "(unable)|(countable)"), "0", str_squish(dysRBC))
+      )
+  }
+
+  data_clean = data_clean %>%
     mutate_all(cl_remove_symbol)
+
   cat("Data cleaning is done.\n")
   return(data_clean)
 }
 
+# lab_cleaner = function(data) {
+#   data_clean = data %>%
+#     mutate_at(c("Uleuko", "Uprot", "Uglc", "Uketone", "UUB", "Ubil", "Uery", "Unit"), cl_RUA_grade) %>%
+#     mutate_at(c("URBC", "UWBC"), cl_RUA_micro) %>%
+#     mutate_at(c("HbA1c"), cl_A1c) %>%
+#
+#     mutate_at(c("anti_GBM", "anti_dsDNA", "ANCA_PR3", "ANCA_MPO"),
+#               .funs=list(titer=cl_extract_titer)) %>%
+#     mutate_at(c("anti_HIV", "anti_HCV", "HBsAg", "RPR", "anti_HAV"),
+#               cl_serol_marker, cutoff=1) %>%
+#     mutate_at(c("anti_HBs"), cl_serol_marker, cutoff=10) %>%
+#     mutate_at(c("anti_GBM"), cl_serol_marker, cutoff=15) %>%
+#     mutate_at(c("anti_dsDNA", "ANCA", "ANCA_PR3", "ANCA_MPO", "cryoglobulin"),
+#               cl_serol_marker, cutoff=0) %>%
+#     mutate(
+#       RPR = ifelse(
+#         RPR2 == "Non Reactive", "Negative",
+#         ifelse(RPR2 == "Reactive", "Positive", RPR)),
+#       dysRBC = ifelse(str_detect(dysRBC, "(unable)|(countable)"), "0", str_squish(dysRBC))
+#     ) %>%
+#
+#     mutate_at(c("ANA"), cl_ANA) %>%
+#     mutate_at(c("ANAtiter"), cl_ANA_titer) %>%
+#
+#     mutate_all(cl_remove_symbol)
+#   cat("Data cleaning is done.\n")
+#   return(data_clean)
+# }
 
