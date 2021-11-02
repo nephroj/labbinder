@@ -217,9 +217,10 @@ lab_cleaner = function(data) {
 
   clean_apply = function(data, var, func, ..., varname=var){
     if (var %in% column_name){
-      data_clean = data %>%
+      data = data %>%
         mutate(!!as.name(varname) := func(data[[var]], ...))
     }
+    return(data)
   }
 
   data_clean = data %>%
