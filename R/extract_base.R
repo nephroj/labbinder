@@ -19,7 +19,8 @@ extract_base = function(
     arrange(id, orderdate, abs_lab_diff) %>%
     group_by(id, orderdate) %>%
     summarise_all(select_first_lab) %>%
-    select(-lab_diff, -abs_lab_diff)
+    select(-lab_diff, -abs_lab_diff) %>%
+    ungroup()
 
   return(basedt)
 }
