@@ -6,7 +6,10 @@
 #' @export
 cl_RUA_grade = function(x) {
   unique_x = stringr::str_extract(unique(x), "([+]\\d)|(\\d[+]|[+]{2,4})")
-  if(length(intersect(unique_x, c("1+", "+1", "2+", "+2", "++", "3+", "+3", "+++"))) > 0){
+  if(sum(!is.na(x)) == 0){
+    grade = x
+
+  } else if(length(intersect(unique_x, c("1+", "+1", "2+", "+2", "++", "3+", "+3", "+++"))) > 0){
     # variables with 1+, 2+, 3+, or 4+ grade (like Uprot)
     grade = case_when(
       is.na(x) ~ x,
@@ -19,6 +22,7 @@ cl_RUA_grade = function(x) {
       x %in% c("-") ~ "Negative",
       TRUE ~ paste0(x, "_error")
     )
+
   } else{
     # variables with positive or negative values (like Unit)
     grade = case_when(
@@ -180,7 +184,7 @@ cl_ANA_titer = function(x){
 #' @keywords cl_remove_symbol
 #' @export
 cl_remove_symbol = function(x){
-  if (length(x[!is.na(x)]) == 0){
+  if (sum(!is.na(x)) == 0){
     return(x)
   }
   x2 = str_replace_all(x, "\\s*", "")
