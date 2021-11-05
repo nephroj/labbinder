@@ -6,10 +6,7 @@
 #' @export
 cl_RUA_grade = function(x) {
   unique_x = stringr::str_extract(unique(x), "([+]\\d)|(\\d[+]|[+]{2,4})")
-  if(sum(!is.na(x)) == 0){
-    grade = x
-
-  } else if(length(intersect(unique_x, c("1+", "+1", "2+", "+2", "++", "3+", "+3", "+++"))) > 0){
+  if(length(intersect(unique_x, c("1+", "+1", "2+", "+2", "++", "3+", "+3", "+++"))) > 0){
     # variables with 1+, 2+, 3+, or 4+ grade (like Uprot)
     grade = case_when(
       is.na(x) ~ x,
@@ -177,13 +174,26 @@ cl_ANA_titer = function(x){
   return(result)
 }
 
+#' cl_dysRBC()) Function
+#'
+#' Clean dysmorphic RBC values.
+#' @param x Vector
+#' @keywords cl_dysRBC
+#' @export
+cl_dysRBC = function(x){
+  result = case_when(
+    str_detect(x, "(unable)|(countable)") ~ "0",
+    TRUE ~ str_squish(x))
+  return(result)
+}
+
 #' cl_remove_symbol() Function
 #'
 #' Remove the symbols unnecessary
 #' @param x Vector
 #' @keywords cl_remove_symbol
 #' @export
-cl_remove_symbol = function(x){
+cl_remove_symbol = function(x, y){
   if (sum(!is.na(x)) == 0){
     return(x)
   }
@@ -203,7 +213,7 @@ cl_remove_symbol = function(x){
     return(x)
   }
   else if (result_non_num_len / result_total_len < 0.02) {
-    if(result_non_num_len != 0) cat(unique(result_non_num), "will be replaced by NA.\n")
+    if(result_non_num_len != 0) cat(y, ": ", str_c(unique(result_non_num), collapse=", "), " --> NA\n", sep="")
     result[!is.na(result) & !str_detect(result, "^\\d+[.]{0,1}\\d*(e|E){0,1}[-|+]{0,1}\\d*$")] = NA
     return(as.numeric(result))
   } else{
@@ -217,11 +227,11 @@ cl_remove_symbol = function(x){
 #' @param data Dataframe to be cleaned
 #' @keywords lab_cleaner
 #' @export
-lab_cleaner = function(data) {
+lab_cleaner = function(data, rm_empty_col=F) {
   column_name = colnames(data)
 
   clean_apply = function(data, var, func, ..., varname=var){
-    if (var %in% column_name){
+    if (var %in% column_name & sum(!is.na(data[[var]])) != 0){
       data = data %>%
         mutate(!!as.name(varname) := func(data[[var]], ...))
     }
@@ -232,6 +242,7 @@ lab_cleaner = function(data) {
     clean_apply("Uleuko", cl_RUA_grade) %>%
     clean_apply("Uprot", cl_RUA_grade) %>%
     clean_apply("Uketone", cl_RUA_grade) %>%
+    clean_apply("Uglc", cl_RUA_grade) %>%
     clean_apply("UUB", cl_RUA_grade) %>%
     clean_apply("Ubil", cl_RUA_grade) %>%
     clean_apply("Uery", cl_RUA_grade) %>%
@@ -263,9 +274,10 @@ lab_cleaner = function(data) {
     clean_apply("cryoglobulin", cl_serol_marker, cutoff=0) %>%
 
     clean_apply("ANA", cl_ANA) %>%
-    clean_apply("ANAtiter", cl_ANA_titer)
+    clean_apply("ANAtiter", cl_ANA_titer) %>%
+    clean_apply("dysRBC", cl_dysRBC)
 
-  if ("RPR" %in% column_name & "RPR2" %in% column_name){
+  if ("RPR" %in% column_name & "RPR2" %in% column_name & sum(!is.na(data_clean[["RPR2"]])) != 0){
     data_clean = data_clean %>%
       mutate(
         RPR = case_when(
@@ -274,46 +286,35 @@ lab_cleaner = function(data) {
           TRUE ~ RPR)
       )
   }
-  if ("dysRBC" %in% column_name){
-    data_clean = data_clean %>%
-      mutate(
-        dysRBC = ifelse(str_detect(dysRBC, "(unable)|(countable)"), "0", str_squish(dysRBC))
-      )
-  }
 
   data_clean = data_clean %>%
-    mutate_all(cl_remove_symbol)
+    purrr::imap_dfc(cl_remove_symbol)
+
+  if (rm_empty_col) {
+    data_clean = data_clean %>%
+      select_if(~any(!is.na(.)))
+  }
 
   cat("Data cleaning is done.\n")
   return(data_clean)
 }
 
-# lab_cleaner = function(data) {
-#   data_clean = data %>%
-#     mutate_at(c("Uleuko", "Uprot", "Uglc", "Uketone", "UUB", "Ubil", "Uery", "Unit"), cl_RUA_grade) %>%
-#     mutate_at(c("URBC", "UWBC"), cl_RUA_micro) %>%
-#     mutate_at(c("HbA1c"), cl_A1c) %>%
-#
-#     mutate_at(c("anti_GBM", "anti_dsDNA", "ANCA_PR3", "ANCA_MPO"),
-#               .funs=list(titer=cl_extract_titer)) %>%
-#     mutate_at(c("anti_HIV", "anti_HCV", "HBsAg", "RPR", "anti_HAV"),
-#               cl_serol_marker, cutoff=1) %>%
-#     mutate_at(c("anti_HBs"), cl_serol_marker, cutoff=10) %>%
-#     mutate_at(c("anti_GBM"), cl_serol_marker, cutoff=15) %>%
-#     mutate_at(c("anti_dsDNA", "ANCA", "ANCA_PR3", "ANCA_MPO", "cryoglobulin"),
-#               cl_serol_marker, cutoff=0) %>%
-#     mutate(
-#       RPR = ifelse(
-#         RPR2 == "Non Reactive", "Negative",
-#         ifelse(RPR2 == "Reactive", "Positive", RPR)),
-#       dysRBC = ifelse(str_detect(dysRBC, "(unable)|(countable)"), "0", str_squish(dysRBC))
-#     ) %>%
-#
-#     mutate_at(c("ANA"), cl_ANA) %>%
-#     mutate_at(c("ANAtiter"), cl_ANA_titer) %>%
-#
-#     mutate_all(cl_remove_symbol)
-#   cat("Data cleaning is done.\n")
-#   return(data_clean)
-# }
 
+#' lab_cleaner_read() Function
+#'
+#' Cleaning the dataframe.
+#' @param file file to be cleaned
+#' @keywords lab_cleaner_read
+#' @export
+lab_cleaner_read = function(file, rm_empty_col=F){
+  file_name = basename(file)
+  if (stringr::str_detect(file_name, "[.]xlsx")){
+    data = readxl::read_excel(file, col_types="text")
+  } else if (stringr::str_detect(file_name, "[.]csv")){
+    data = readr::read_csv(file, locale=locale(encoding="CP949"), col_types=cols(.default="c"))
+  } else {
+    stop("Incorrect file type. Use a csv file or a excel file.")
+  }
+  data_clean = lab_cleaner(data, rm_empty_col)
+  return(data_clean)
+}

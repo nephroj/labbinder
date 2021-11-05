@@ -4,7 +4,7 @@
 \alias{lab_cleaner}
 \title{lab_cleaner() Function}
 \usage{
-lab_cleaner(data)
+lab_cleaner(data, rm_empty_col = F)
 }
 \arguments{
 \item{data}{Dataframe to be cleaned}

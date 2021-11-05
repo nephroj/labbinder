@@ -4,7 +4,7 @@
 \alias{cl_remove_symbol}
 \title{cl_remove_symbol() Function}
 \usage{
-cl_remove_symbol(x)
+cl_remove_symbol(x, y)
 }
 \arguments{
 \item{x}{Vector}
