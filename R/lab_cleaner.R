@@ -5,7 +5,8 @@
 #' @keywords cl_RUA_grade
 #' @export
 cl_RUA_grade = function(x) {
-  if(length(intersect(unique(x), c("1+", "2+", "+2", "++", "3+", "+3", "+++"))) > 0){
+  unique_x = stringr::str_extract(unique(x), "([+]\\d)|(\\d[+]|[+]{2,4})")
+  if(length(intersect(unique_x, c("1+", "+1", "2+", "+2", "++", "3+", "+3", "+++"))) > 0){
     # variables with 1+, 2+, 3+, or 4+ grade (like Uprot)
     grade = case_when(
       is.na(x) ~ x,
