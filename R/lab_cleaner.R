@@ -199,26 +199,46 @@ cl_remove_symbol = function(x, y){
   }
   x2 = str_replace_all(x, "\\s*", "")
   result = case_when(
-    str_detect(x2, "(?<=[<|>])\\d+[.]{0,1}\\d*") ~ str_extract(x2, "(?<=[<|>])\\d+[.]{0,1}\\d*"),
+    str_detect(x2, "(?<=[<|>])\\d+[.]{0,1}\\d*$") ~ str_extract(x2, "(?<=[<|>])\\d+[.]{0,1}\\d*"),
     str_detect(x2, "^[.]|[-]{1,4}$") ~ NA_character_,
-    str_detect(x2, "\\d+[.]{0,1}\\d*(?=(sec){0,1}((\uc774\uc0c1)|(\uc774\ud558)))") ~     # e-sang, e-ha
-      str_extract(x2, "\\d+[.]{0,1}\\d*(?=(sec){0,1}((\uc774\uc0c1)|(\uc774\ud558)))"),   # e-sang, e-ha
+    str_detect(x2, "^\\d+[.]{0,1}\\d*(?=(sec){0,1}((\uc774\uc0c1)|(\uc774\ud558)))") ~     # e-sang, e-ha
+      str_extract(x2, "^\\d+[.]{0,1}\\d*(?=(sec){0,1}((\uc774\uc0c1)|(\uc774\ud558)))"),   # e-sang, e-ha
     TRUE ~ x2
   )
+
+  # Print different values
+  if (!identical(x2, result)){
+    diff1 = x2[!is.na(x2) & (x2 != result | is.na(result))]
+    diff2 = result[!is.na(x2) & (x2 != result | is.na(result))]
+    diff_dt = data.frame(diff1, diff2) %>%
+      group_by(diff1, diff2) %>%
+      summarise(n = n()) %>%
+      mutate(diff_text = paste0(y, ": ", diff1, " --> ", diff2, " (", n, ")\n"))
+
+    cat(diff_dt$diff_text, sep="")
+  }
+
   result = str_squish(result)
-  result_non_num = result[!is.na(result) & !str_detect(result, "^\\d+[.]{0,1}\\d*(e|E){0,1}[-|+]{0,1}\\d*$")]
-  result_total_len = length(result[!is.na(result)])
+  numeric_string = "^\\d+[.]{0,1}\\d*(e|E){0,1}[-|+]{0,1}\\d*$"
+  result_non_num = result[!is.na(result) & !str_detect(result, numeric_string)]
+  result_total_len = sum(!is.na(result))
   result_non_num_len = length(result_non_num)
+
   if (result_total_len == 0){
-    return(x)
-  }
-  else if (result_non_num_len / result_total_len < 0.02) {
-    if(result_non_num_len != 0) cat(y, ": ", str_c(unique(result_non_num), collapse=", "), " --> NA\n", sep="")
-    result[!is.na(result) & !str_detect(result, "^\\d+[.]{0,1}\\d*(e|E){0,1}[-|+]{0,1}\\d*$")] = NA
-    return(as.numeric(result))
+    result_final = x
+
+  } else if (result_non_num_len / result_total_len < 0.02) {
+    if(result_non_num_len != 0) {
+      cat(y, ": ", str_c(unique(result_non_num), collapse=", "), " --> NA\n", sep="")
+    }
+    result[!is.na(result) & !str_detect(result, numeric_string)] = NA
+    result_final = as.numeric(result)
+
   } else{
-    return(x)
+    result_final = x
   }
+
+  return(result_final)
 }
 
 #' lab_cleaner() Function
@@ -295,7 +315,7 @@ lab_cleaner = function(data, rm_empty_col=F) {
       select_if(~any(!is.na(.)))
   }
 
-  cat("Data cleaning is done.\n")
+  cat("\nData cleaning is done.\n")
   return(data_clean)
 }
 
