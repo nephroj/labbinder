@@ -1,15 +1,25 @@
 #' numeric_string() Function
 #'
-#' return a regular expression of numeric string
+#' return the result of regular expression matching of numeric string
+#' @param x Vector
+#' @param exact exact matching or not
+#' @param extract string extract or detect
 #' @keywords numeric_string
 #' @export
-numeric_string = function(exact=F){
+numeric_string = function(x, exact=F, extract=F){
   if (exact){
-    numeric_string = "^\\d+[.]{0,1}\\d*(e|E){0,1}[-|+]{0,1}\\d*$"
+    num_str = "^\\d+[.]?\\d*(e|E)?([-]|[+])?\\d*$"
   } else {
-    numeric_string = "\\d+[.]{0,1}\\d*(e|E){0,1}[-|+]{0,1}\\d*"
+    num_str = "\\d+[.]?\\d*(e|E)?([-]|[+])?\\d*"
   }
-  return(numeric_string)
+
+  if (extract) {
+    num_or_not = str_extract(x, num_str)
+  } else {
+    num_or_not = str_detect(x, num_str)
+  }
+
+  return(num_or_not)
 }
 
 #' cl_RUA_grade() Function
@@ -27,9 +37,9 @@ cl_RUA_grade = function(x) {
       str_detect(str_to_lower(x), "([+][+][+][+])|(4[+])|([+]4)") ~ "4+",
       str_detect(str_to_lower(x), "([+][+][+])|(3[+])|([+]3)") ~ "3+",
       str_detect(str_to_lower(x), "([+][+])|(2[+])|([+]2)") ~ "2+",
-      str_detect(str_to_lower(x), "([+])|(1[+])|([+]1)") ~ "1+",
       str_detect(str_to_lower(x), "(tr)|([+][/][-])") ~ "Trace",
       str_detect(str_to_lower(x), "(neg)|(norm)") ~ "Negative",
+      str_detect(str_to_lower(x), "([+])|(1[+])|([+]1)") ~ "1+",
       x %in% c("-") ~ "Negative",
       TRUE ~ paste0(x, "_error")
     )
@@ -106,16 +116,16 @@ cl_A1c = function(x){
 cl_serol_marker = function(x, cutoff=0){
   if (cutoff == 0){
     x2 = str_replace_all(x, "\\s*", "")
-    result = str_extract(x2, "[a-zA-Z]+")
+    result = ifelse(numeric_string(x2, exact=T), NA, str_extract(x2, "[a-zA-Z]+"))
     return(result)
   } else {
     x = str_to_lower(as.character(x))
-    x_num = as.numeric(str_extract(x, numeric_string()))
+    x_num = as.numeric(numeric_string(x, extract=T))
     result = case_when(
       str_detect(x, "n") ~ "Negative",
       str_detect(x, "p") ~ "Positive",
-      str_detect(x, "\\d+[.]{0,1}\\d*E{0,1}[-|+]{0,1}\\d*") & x_num <= cutoff ~ "Negative",
-      str_detect(x, "\\d+[.]{0,1}\\d*E{0,1}[-|+]{0,1}\\d*") & x_num > cutoff ~ "Positive",
+      numeric_string(x) & x_num <= cutoff ~ "Negative",
+      numeric_string(x) & x_num > cutoff ~ "Positive",
       TRUE ~ x
     )
     return(result)
@@ -130,7 +140,7 @@ cl_serol_marker = function(x, cutoff=0){
 #' @export
 cl_extract_titer = function(x){
   x2 = str_replace_all(x, "\\s*", "")
-  result = str_extract(x2, numeric_string())
+  result = numeric_string(x2, extract=T)
   return(result)
 }
 
@@ -166,14 +176,14 @@ cl_ANA = function(x){
 cl_ANA_titer = function(x){
   num_to_titer = function(ana){
     result = case_when(
-      str_detect(ana, "3[.]{0,1}597") ~ "1:5120_",
-      str_detect(ana, "6[.]{0,1}944") ~ "1:40_",
-      str_detect(ana, "9[.]{0,1}722") ~ "1:80_",
-      str_detect(ana, "1[.]{0,1}527") ~ "1:160_",
-      str_detect(ana, "2[.]{0,1}638") ~ "1:320_",
-      str_detect(ana, "4[.]{0,1}861") ~ "1:640_",
-      str_detect(ana, "9[.]{0,1}305") ~ "1:1280_",
-      str_detect(ana, "1[.]{0,1}819") ~ "1:2560_",
+      str_detect(ana, "3[.]?597") ~ "1:5120_",
+      str_detect(ana, "6[.]?944") ~ "1:40_",
+      str_detect(ana, "9[.]?722") ~ "1:80_",
+      str_detect(ana, "1[.]?527") ~ "1:160_",
+      str_detect(ana, "2[.]?638") ~ "1:320_",
+      str_detect(ana, "4[.]?861") ~ "1:640_",
+      str_detect(ana, "9[.]?305") ~ "1:1280_",
+      str_detect(ana, "1[.]?819") ~ "1:2560_",
       TRUE ~ ana
     )
   }
@@ -182,7 +192,7 @@ cl_ANA_titer = function(x){
     is.na(x) ~ x,
     str_detect(x2, "1[:]\\d{1,5}") ~ paste0(str_extract(x2, "1[:]\\d{1,5}"), "_"),
     str_detect(x2, "neg") ~ "Negative",
-    str_detect(x2, numeric_string()) ~ num_to_titer(x2),
+    numeric_string(x2) ~ num_to_titer(x2),
     TRUE ~ x
   )
   return(result)
@@ -213,10 +223,10 @@ cl_remove_symbol = function(x, y){
   }
   x2 = str_replace_all(x, "\\s*", "")
   result = case_when(
-    str_detect(x2, "(?<=[<|>])\\d+[.]{0,1}\\d*$") ~ str_extract(x2, "(?<=[<|>])\\d+[.]{0,1}\\d*"),
+    str_detect(x2, "(?<=[<|>])\\d+[.]?\\d*$") ~ str_extract(x2, "(?<=[<|>])\\d+[.]?\\d*"),
     str_detect(x2, "^[.]|[-]{1,4}$") ~ NA_character_,
-    str_detect(x2, "^\\d+[.]{0,1}\\d*(?=(sec){0,1}((\uc774\uc0c1)|(\uc774\ud558)))") ~     # e-sang, e-ha
-      str_extract(x2, "^\\d+[.]{0,1}\\d*(?=(sec){0,1}((\uc774\uc0c1)|(\uc774\ud558)))"),   # e-sang, e-ha
+    str_detect(x2, "^\\d+[.]?\\d*(?=(sec)?((\uc774\uc0c1)|(\uc774\ud558)))") ~     # e-sang, e-ha
+      str_extract(x2, "^\\d+[.]?\\d*(?=(sec)?((\uc774\uc0c1)|(\uc774\ud558)))"),   # e-sang, e-ha
     TRUE ~ x2
   )
 
@@ -233,7 +243,7 @@ cl_remove_symbol = function(x, y){
   }
 
   result = str_squish(result)
-  result_non_num = result[!is.na(result) & !str_detect(result, numeric_string(exact=T))]
+  result_non_num = result[!is.na(result) & !numeric_string(result, exact=T)]
   result_total_len = sum(!is.na(result))
   result_non_num_len = length(result_non_num)
 
@@ -244,7 +254,7 @@ cl_remove_symbol = function(x, y){
     if(result_non_num_len != 0) {
       cat(y, ": ", str_c(unique(result_non_num), collapse=", "), " --> NA\n", sep="")
     }
-    result[!is.na(result) & !str_detect(result, numeric_string(exact=T))] = NA
+    result[!is.na(result) & !numeric_string(result, exact=T)] = NA
     result_final = as.numeric(result)
 
   } else{
@@ -391,8 +401,11 @@ clean_compare = function(data_orig, data_clean) {
       orig = x1[!is.na(x1) & (x1 != x2 | is.na(x2))]
       cleaned = x2[!is.na(x1) & (x1 != x2 | is.na(x2))]
       diff_dt = data.frame(orig, cleaned) %>%
-        filter(!str_detect(orig, numeric_string(exact=T)) |
-                 !str_detect(cleaned, numeric_string(exact=T))) %>%
+        filter(
+          !numeric_string(orig, exact=T) |
+            !numeric_string(cleaned, exact=T) |
+            is.na(cleaned)
+        ) %>%
         group_by(orig, cleaned) %>%
         summarise(n = n()) %>%
         mutate(

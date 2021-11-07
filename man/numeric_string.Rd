@@ -4,9 +4,16 @@
 \alias{numeric_string}
 \title{numeric_string() Function}
 \usage{
-numeric_string(exact = F)
+numeric_string(x, exact = F, extract = F)
+}
+\arguments{
+\item{x}{Vector}
+
+\item{exact}{exact matching or not}
+
+\item{extract}{string extract or detect}
 }
 \description{
-return a regular expression of numeric string
+return the result of regular expression matching of numeric string
 }
 \keyword{numeric_string}
