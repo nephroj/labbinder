@@ -11,11 +11,13 @@
 #' @importFrom dplyr %>%
 #' @importFrom rlang :=
 #' @importFrom dplyr select
+#' @importFrom dplyr select_if
 #' @importFrom dplyr mutate
 #' @importFrom dplyr mutate_at
 #' @importFrom dplyr mutate_all
 #' @importFrom dplyr rename
 #' @importFrom dplyr filter
+#' @importFrom dplyr summarise
 #' @importFrom dplyr summarise_all
 #' @importFrom dplyr summarise_at
 #' @importFrom dplyr arrange
@@ -24,6 +26,10 @@
 #' @importFrom dplyr left_join
 #' @importFrom dplyr bind_rows
 #' @importFrom dplyr case_when
+#' @importFrom dplyr across
+#' @importFrom dplyr n
+#' @importFrom dplyr ungroup
+#' @importFrom dplyr as_tibble
 #' @importFrom tidyr spread
 #' @importFrom tibble column_to_rownames
 #' @importFrom tibble rownames_to_column
@@ -129,8 +135,7 @@ lab_binder = function(
       summarise_all(select_first_lab) %>%
       column_to_rownames("vname") %>%
       t() %>%
-      as.data.frame() %>%
-      rownames_to_column(var="labdate") %>%
+      as_tibble(rownames="labdate") %>%
       mutate(
         labdate = as.POSIXct(labdate),
         id = as.integer(id)

@@ -1,3 +1,17 @@
+#' numeric_string() Function
+#'
+#' return a regular expression of numeric string
+#' @keywords numeric_string
+#' @export
+numeric_string = function(exact=F){
+  if (exact){
+    numeric_string = "^\\d+[.]{0,1}\\d*(e|E){0,1}[-|+]{0,1}\\d*$"
+  } else {
+    numeric_string = "\\d+[.]{0,1}\\d*(e|E){0,1}[-|+]{0,1}\\d*"
+  }
+  return(numeric_string)
+}
+
 #' cl_RUA_grade() Function
 #'
 #' Clean RUA results containing grade values such as 1+, 2+, 3+, and 4+.
@@ -96,7 +110,7 @@ cl_serol_marker = function(x, cutoff=0){
     return(result)
   } else {
     x = str_to_lower(as.character(x))
-    x_num = as.numeric(str_extract(x, "\\d+[.]{0,1}\\d*e{0,1}[-|+]{0,1}\\d*"))
+    x_num = as.numeric(str_extract(x, numeric_string()))
     result = case_when(
       str_detect(x, "n") ~ "Negative",
       str_detect(x, "p") ~ "Positive",
@@ -116,7 +130,7 @@ cl_serol_marker = function(x, cutoff=0){
 #' @export
 cl_extract_titer = function(x){
   x2 = str_replace_all(x, "\\s*", "")
-  result = str_extract(x2, "\\d+[.]{0,1}\\d*e{0,1}[-|+]{0,1}\\d*")
+  result = str_extract(x2, numeric_string())
   return(result)
 }
 
@@ -168,7 +182,7 @@ cl_ANA_titer = function(x){
     is.na(x) ~ x,
     str_detect(x2, "1[:]\\d{1,5}") ~ paste0(str_extract(x2, "1[:]\\d{1,5}"), "_"),
     str_detect(x2, "neg") ~ "Negative",
-    str_detect(x2, "\\d+[.]{0,1}\\d*e{0,1}[-|+]{0,1}\\d*") ~ num_to_titer(x2),
+    str_detect(x2, numeric_string()) ~ num_to_titer(x2),
     TRUE ~ x
   )
   return(result)
@@ -219,8 +233,7 @@ cl_remove_symbol = function(x, y){
   }
 
   result = str_squish(result)
-  numeric_string = "^\\d+[.]{0,1}\\d*(e|E){0,1}[-|+]{0,1}\\d*$"
-  result_non_num = result[!is.na(result) & !str_detect(result, numeric_string)]
+  result_non_num = result[!is.na(result) & !str_detect(result, numeric_string(exact=T))]
   result_total_len = sum(!is.na(result))
   result_non_num_len = length(result_non_num)
 
@@ -231,7 +244,7 @@ cl_remove_symbol = function(x, y){
     if(result_non_num_len != 0) {
       cat(y, ": ", str_c(unique(result_non_num), collapse=", "), " --> NA\n", sep="")
     }
-    result[!is.na(result) & !str_detect(result, numeric_string)] = NA
+    result[!is.na(result) & !str_detect(result, numeric_string(exact=T))] = NA
     result_final = as.numeric(result)
 
   } else{
@@ -239,6 +252,21 @@ cl_remove_symbol = function(x, y){
   }
 
   return(result_final)
+}
+
+#' cl_RPR_from_RPR2() Function
+#'
+#' RPR cleaning from RPR2 values
+#' @param x1 Vector
+#' @param x2 Vector
+#' @keywords cl_RPR_from_RPR2
+#' @export
+cl_RPR_from_RPR2 = function(x1, x2) {
+  result = case_when(
+    x2 == "Non Reactive" ~ "Negative",
+    x2 == "Reactive" ~ "Positive",
+    TRUE ~ x1)
+  return(result)
 }
 
 #' lab_cleaner() Function
@@ -250,10 +278,20 @@ cl_remove_symbol = function(x, y){
 lab_cleaner = function(data, rm_empty_col=F) {
   column_name = colnames(data)
 
+  # Apply the clean function to the specific variable
   clean_apply = function(data, var, func, ..., varname=var){
     if (var %in% column_name & sum(!is.na(data[[var]])) != 0){
       data = data %>%
         mutate(!!as.name(varname) := func(data[[var]], ...))
+    }
+    return(data)
+  }
+
+  # Mutate var1 values using var2 values
+  clean_apply2 = function(data, var1, var2, func, ..., varname=var1){
+    if (var1 %in% column_name & var2 %in% column_name & sum(!is.na(data[[var2]])) != 0){
+      data = data %>%
+        mutate(!!as.name(varname) := func(data[[var1]], data[[var2]], ...))
     }
     return(data)
   }
@@ -295,21 +333,15 @@ lab_cleaner = function(data, rm_empty_col=F) {
 
     clean_apply("ANA", cl_ANA) %>%
     clean_apply("ANAtiter", cl_ANA_titer) %>%
-    clean_apply("dysRBC", cl_dysRBC)
+    clean_apply("dysRBC", cl_dysRBC) %>%
 
-  if ("RPR" %in% column_name & "RPR2" %in% column_name & sum(!is.na(data_clean[["RPR2"]])) != 0){
-    data_clean = data_clean %>%
-      mutate(
-        RPR = case_when(
-          RPR2 == "Non Reactive" ~ "Negative",
-          RPR2 == "Reactive" ~ "Positive",
-          TRUE ~ RPR)
-      )
-  }
+    clean_apply2("RPR", "RPR2", cl_RPR_from_RPR2)
 
+  # Apply the cl_remove_function to all columns
   data_clean = data_clean %>%
     purrr::imap_dfc(cl_remove_symbol)
 
+  # Remove the empty columns
   if (rm_empty_col) {
     data_clean = data_clean %>%
       select_if(~any(!is.na(.)))
@@ -337,4 +369,43 @@ lab_cleaner_read = function(file, rm_empty_col=F){
   }
   data_clean = lab_cleaner(data, rm_empty_col)
   return(data_clean)
+}
+
+
+#' clean_compare() Function
+#'
+#' Compare the cleaned data.frame with the original data.frame
+#' @param data_orig a original data.frame
+#' @param data_clean a cleaned data.frame
+#' @keywords clean_compare
+#' @export
+clean_compare = function(data_orig, data_clean) {
+  options(dplyr.summarise.inform = FALSE)
+
+  # Print different values
+  print_diff_vec = function(x, y) {
+    x1 = as.character(data_orig[[y]])
+    x2 = as.character(data_clean[[y]])
+
+    if (!identical(x1, x2)){
+      orig = x1[!is.na(x1) & (x1 != x2 | is.na(x2))]
+      cleaned = x2[!is.na(x1) & (x1 != x2 | is.na(x2))]
+      diff_dt = data.frame(orig, cleaned) %>%
+        filter(!str_detect(orig, numeric_string(exact=T)) |
+                 !str_detect(cleaned, numeric_string(exact=T))) %>%
+        group_by(orig, cleaned) %>%
+        summarise(n = n()) %>%
+        mutate(
+          variable = y
+        ) %>%
+        select(variable, orig, cleaned, n) %>%
+        ungroup()
+
+      return(diff_dt)
+    }
+  }
+  all_diff = data_orig %>%
+    purrr::imap(print_diff_vec) %>%
+    dplyr::bind_rows()
+  return(all_diff)
 }

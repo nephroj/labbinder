@@ -26,7 +26,7 @@ bind_base_save = function(
     ptlist_file = ptlist_file,
     lab_dir_path = lab_dir_path,
     lab_info_file = lab_info_file,
-    clean = clean
+    clean = F
   )
 
   basedt = extract_base(
@@ -39,5 +39,20 @@ bind_base_save = function(
   save_file_base = paste0(savefile_name, "_base.csv")
   write.csv(comdt, save_file_all, na="", row.names=F, fileEncoding="CP949")
   write.csv(basedt, save_file_base, na="", row.names=F, fileEncoding="CP949")
-  cat('Data saving is done. ->', dirname(save_file_all), '\n')
+
+
+  if (clean){
+    comdt_clean = lab_cleaner(comdt)
+    basedt_clean = extract_base(
+      data = comdt_clean,
+      base_window_period = base_window_period
+    )
+    # save to CSV files
+    save_file_all_clean = paste0(savefile_name, "_all_clean.csv")
+    save_file_base_clean = paste0(savefile_name, "_base_clean.csv")
+    write.csv(comdt_clean, save_file_all_clean, na="", row.names=F, fileEncoding="CP949")
+    write.csv(basedt_clean, save_file_base_clean, na="", row.names=F, fileEncoding="CP949")
+  }
+
+  cat('Data saving is done. \n->', dirname(save_file_all), '\n')
 }
