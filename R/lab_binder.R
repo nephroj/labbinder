@@ -51,6 +51,8 @@ lab_binder = function(
   clean = TRUE
 ) {
 
+  start_time = Sys.time()
+
   # Load data
   if (is.null(lab_info_file)){
     lab_info_dt = lab_info
@@ -155,7 +157,10 @@ lab_binder = function(
     left_join(comdt_pre, by="id") %>%
     mutate(hospital = hospital) %>%
     select(c("hospital", "id", "orderdate", "labdate", lab_info_hosp$vname))
-  cat("Data combination is done.\n")
+
+  end_time = Sys.time()
+  time_spent = round(as.numeric((difftime(end_time, start_time, units="secs"))), 1)
+  cat("Data combination is done (", time_spent, " secs).\n", sep="")
 
   ## Clean data & Remove empty columns
   if (clean){

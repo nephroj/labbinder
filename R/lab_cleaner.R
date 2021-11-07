@@ -286,6 +286,8 @@ cl_RPR_from_RPR2 = function(x1, x2) {
 #' @keywords lab_cleaner
 #' @export
 lab_cleaner = function(data, rm_empty_col=F) {
+
+  start_time = Sys.time()
   column_name = colnames(data)
 
   # Apply the clean function to the specific variable
@@ -357,7 +359,9 @@ lab_cleaner = function(data, rm_empty_col=F) {
       select_if(~any(!is.na(.)))
   }
 
-  cat("\nData cleaning is done.\n")
+  end_time = Sys.time()
+  time_spent = round(as.numeric((difftime(end_time, start_time, units="secs"))), 1)
+  cat("Data cleaning is done (", time_spent, " secs).\n", sep="")
   return(data_clean)
 }
 
