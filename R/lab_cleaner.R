@@ -217,7 +217,7 @@ cl_dysRBC = function(x){
 #' @param x Vector
 #' @keywords cl_remove_symbol
 #' @export
-cl_remove_symbol = function(x, y){
+cl_remove_symbol = function(x, y=NULL){
   if (sum(!is.na(x)) == 0){
     return(x)
   }
@@ -225,8 +225,8 @@ cl_remove_symbol = function(x, y){
   result = case_when(
     str_detect(x2, "(?<=[<|>])\\d+[.]?\\d*$") ~ str_extract(x2, "(?<=[<|>])\\d+[.]?\\d*"),
     str_detect(x2, "^[.]|[-]{1,4}$") ~ NA_character_,
-    str_detect(x2, "^\\d+[.]?\\d*(?=(sec)?((\uc774\uc0c1)|(\uc774\ud558)))") ~     # e-sang, e-ha
-      str_extract(x2, "^\\d+[.]?\\d*(?=(sec)?((\uc774\uc0c1)|(\uc774\ud558)))"),   # e-sang, e-ha
+    str_detect(x2, "^\\d+[.]?\\d*(?=(sec)?((\uc774\uc0c1)|(\uc774\ud558)|(\uBBF8\uB9CC)))") ~     # e-sang, e-ha, mi-man
+      str_extract(x2, "^\\d+[.]?\\d*(?=(sec)?((\uc774\uc0c1)|(\uc774\ud558)|(\uBBF8\uB9CC)))"),   # e-sang, e-ha, mi-man
     TRUE ~ x2
   )
 
